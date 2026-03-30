@@ -2,186 +2,288 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>VTS Video Den Test</title>
+  <title>VTS Video Den</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: #111;
-    }
+:root {
+  --bg-teal: #2E474F;
+  --wall-brown: #472A29;
+  --wall-height: 621px;
+}
 
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg-teal);
+  overflow: hidden;
+}
 
-    canvas {
-      width: min(100vw, 1400px);
-      height: auto;
-      display: block;
-      outline: 1px solid rgba(255,255,255,0.2);
-    }
-  </style>
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--wall-height);
+  background: var(--wall-brown);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.frame {
+  position: relative;
+  min-height: 100vh;
+  width: auto;
+  background: transparent;
+  overflow: hidden;
+  z-index: 1;
+}
+
+  .wall-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+  .scene-holder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (min-width: 3004px) {
+  :root {
+    --wall-height: 621px;
+  }
+
+  .frame {
+    width: 3004px;
+  }
+
+  .scene-holder {
+    height: 865px;
+  }
+}
+
+@media (min-width: 810px) and (max-width: 3003.98px) {
+  :root {
+    --wall-height: 621px;
+  }
+
+  .frame {
+    width: 1600px;
+    max-width: 100vw;
+  }
+
+  .scene-holder {
+    height: 865px;
+  }
+}
+
+@media (max-width: 809.98px) {
+  :root {
+    --wall-height: 0px;
+  }
+
+  .frame {
+    width: 100vw;
+  }
+
+  .scene-holder {
+    height: 540px;
+    left: 0;
+    right: 0;
+  }
+
+  .canvas-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  canvas {
+    width: 760px;
+    height: 100%;
+    max-width: none;
+  }
+}
+</style>
 
   <script src="https://unpkg.com/@rive-app/webgl2"></script>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
-  <canvas id="rive-canvas" width="1400" height="900"></canvas>
+  <div class="frame">
+
+    <div class="scene-holder">
+      <div class="canvas-wrap">
+        <canvas id="rive-canvas" width="1877" height="1080"></canvas>
+      </div>
+    </div>
+  </div>
 
   <script>
-  const canvas = document.getElementById("rive-canvas");
+    const canvas = document.getElementById("rive-canvas");
 
-  const SHEET_ID = "1XH9UmWCr_foe9-QFDNfpLVWKh9iSl2TStAZzncKG13E";
-  const SHEET_NAME = "Sheet1";
+    const SHEET_ID = "1XH9UmWCr_foe9-QFDNfpLVWKh9iSl2TStAZzncKG13E";
+    const SHEET_NAME = "Sheet1";
 
-  let r;
-  let sheetRows = [];
-  let lastRowIndex = -1;
+    let r;
+    let sheetRows = [];
+    let lastRowIndex = -1;
+    let staticSequenceLocked = false;
 
-  function resizeRive() {
-    if (r) {
-      r.resizeDrawingSurfaceToCanvas();
-    }
-  }
-
-  function getPopupVMI() {
-    return r.viewModelInstance.viewModel("propertyOfVMPopUp");
-  }
-
-  function getStaticSequenceTrigger() {
-    return r.viewModelInstance
-      .viewModel("propertyOfVMTV")
-      .viewModel("propertyOfVMStatic")
-      .trigger("staticSequence");
-  }
-
-  function setPopupText(headline, subhead) {
-    const popupVMI = getPopupVMI();
-    popupVMI.string("headlineProperty").value = headline;
-    popupVMI.string("subheadProperty").value = subhead;
-    console.log("Popup text set:", { headline, subhead });
-  }
-
-  function querySheetRows() {
-    return new Promise((resolve, reject) => {
-      const queryUrl =
-        `https://spreadsheets.google.com/tq?key=${SHEET_ID}` +
-        `&sheet=${encodeURIComponent(SHEET_NAME)}` +
-        `&headers=0` +
-        `&tq=${encodeURIComponent("select A, B")}`;
-
-      const query = new google.visualization.Query(queryUrl);
-
-      query.send((response) => {
-        if (response.isError()) {
-          reject(
-            new Error(
-              `${response.getMessage()} ${response.getDetailedMessage() || ""}`.trim()
-            )
-          );
-          return;
-        }
-
-        const data = response.getDataTable();
-        const rows = [];
-
-        for (let i = 0; i < data.getNumberOfRows(); i++) {
-          const headline = (data.getValue(i, 0) || "").toString().trim();
-          const subhead = (data.getValue(i, 1) || "").toString().trim();
-
-          if (headline && subhead) {
-            rows.push({ headline, subhead });
-          }
-        }
-
-        resolve(rows);
-      });
-    });
-  }
-
-  function pickRandomRow(rows) {
-    if (!rows.length) return null;
-
-    if (rows.length === 1) {
-      lastRowIndex = 0;
-      return rows[0];
-    }
-
-    let index;
-    do {
-      index = Math.floor(Math.random() * rows.length);
-    } while (index === lastRowIndex);
-
-    lastRowIndex = index;
-    return rows[index];
-  }
-
-  function applyRandomPopupText() {
-    const pair = pickRandomRow(sheetRows);
-
-    if (!pair) {
-      console.warn("No valid rows available.");
-      return;
-    }
-
-    setPopupText(pair.headline, pair.subhead);
-    resizeRive();
-  }
-
-  google.charts.load("current", { packages: ["table"] });
-  google.charts.setOnLoadCallback(() => {
-    r = new rive.Rive({
-      src: "vts_video_vault_master.riv",
-      canvas: canvas,
-      autoplay: true,
-      autoBind: true,
-      artboard: "VTS VIDEO DEN 02",
-      stateMachines: "State Machine 1",
-
-      onLoad: async () => {
-        console.log("Rive loaded");
-        resizeRive();
-
-        try {
-          sheetRows = await querySheetRows();
-          console.log("Sheet rows:", sheetRows);
-
-          applyRandomPopupText();
-
-const staticSequenceTrigger = getStaticSequenceTrigger();
-
-let staticSequenceLocked = false;
-
-staticSequenceTrigger.on(() => {
-  if (staticSequenceLocked) return;
-
-  staticSequenceLocked = true;
-  console.log("staticSequence fired");
-
-  applyRandomPopupText();
-
-  // unlock after the sequence has had plenty of time to finish
-  setTimeout(() => {
-    staticSequenceLocked = false;
-    console.log("staticSequence unlocked");
-  }, 9000);
-});
-
-        } catch (err) {
-          console.error("Sheet load failed:", err);
-        }
-      },
-
-      onLoadError: (err) => {
-        console.error("Rive load error:", err);
+    function resizeRive() {
+      if (r) {
+        r.resizeDrawingSurfaceToCanvas();
       }
-    });
+    }
 
-    window.addEventListener("resize", resizeRive);
-  });
-</script>
+    function getPopupVMI() {
+      return r.viewModelInstance.viewModel("propertyOfVMPopUp");
+    }
+
+    function getStaticSequenceTrigger() {
+      return r.viewModelInstance
+        .viewModel("propertyOfVMTV")
+        .viewModel("propertyOfVMStatic")
+        .trigger("staticSequence");
+    }
+
+    function setPopupText(headline, subhead) {
+      const popupVMI = getPopupVMI();
+      popupVMI.string("headlineProperty").value = headline;
+      popupVMI.string("subheadProperty").value = subhead;
+    }
+
+    function querySheetRows() {
+      return new Promise((resolve, reject) => {
+        const queryUrl =
+          `https://spreadsheets.google.com/tq?key=${SHEET_ID}` +
+          `&sheet=${encodeURIComponent(SHEET_NAME)}` +
+          `&headers=0` +
+          `&tq=${encodeURIComponent("select A, B")}`;
+
+        const query = new google.visualization.Query(queryUrl);
+
+        query.send((response) => {
+          if (response.isError()) {
+            reject(
+              new Error(
+                `${response.getMessage()} ${response.getDetailedMessage() || ""}`.trim()
+              )
+            );
+            return;
+          }
+
+          const data = response.getDataTable();
+          const rows = [];
+
+          for (let i = 0; i < data.getNumberOfRows(); i++) {
+            const headline = (data.getValue(i, 0) || "").toString().trim();
+            const subhead = (data.getValue(i, 1) || "").toString().trim();
+
+            if (headline && subhead) {
+              rows.push({ headline, subhead });
+            }
+          }
+
+          resolve(rows);
+        });
+      });
+    }
+
+    function pickRandomRow(rows) {
+      if (!rows.length) return null;
+
+      if (rows.length === 1) {
+        lastRowIndex = 0;
+        return rows[0];
+      }
+
+      let index;
+      do {
+        index = Math.floor(Math.random() * rows.length);
+      } while (index === lastRowIndex);
+
+      lastRowIndex = index;
+      return rows[index];
+    }
+
+    function applyRandomPopupText() {
+      const pair = pickRandomRow(sheetRows);
+      if (!pair) return;
+      setPopupText(pair.headline, pair.subhead);
+      resizeRive();
+    }
+
+    google.charts.load("current", { packages: ["table"] });
+    google.charts.setOnLoadCallback(() => {
+      r = new rive.Rive({
+        src: "vts_video_vault_master.riv",
+        canvas: canvas,
+        autoplay: true,
+        autoBind: true,
+        artboard: "VTS VIDEO DEN 02",
+        stateMachines: "State Machine 1",
+
+        onLoad: async () => {
+          resizeRive();
+
+          try {
+            sheetRows = await querySheetRows();
+            applyRandomPopupText();
+
+            const staticSequenceTrigger = getStaticSequenceTrigger();
+
+            staticSequenceTrigger.on(() => {
+              if (staticSequenceLocked) return;
+
+              staticSequenceLocked = true;
+              applyRandomPopupText();
+
+              setTimeout(() => {
+                staticSequenceLocked = false;
+              }, 9000);
+            });
+          } catch (err) {
+            console.error("Sheet load failed:", err);
+          }
+        },
+
+        onLoadError: (err) => {
+          console.error("Rive load error:", err);
+        }
+      });
+
+      window.addEventListener("resize", resizeRive);
+    });
+  </script>
 </body>
 </html>
