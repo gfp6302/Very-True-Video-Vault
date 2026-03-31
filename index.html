@@ -133,6 +133,25 @@ body::before {
     max-width: none;
   }
 }
+
+/* LIGHTS OUT OVERLAY */
+#lights-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #4017D2;
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 9999;
+}
+
+#lights-overlay.active {
+  opacity: 1;
+}
 </style>
 
   <script src="https://unpkg.com/@rive-app/webgl2"></script>
@@ -147,6 +166,8 @@ body::before {
       </div>
     </div>
   </div>
+
+  <div id="lights-overlay"></div>
 
   <script>
     const canvas = document.getElementById("rive-canvas");
@@ -272,6 +293,26 @@ body::before {
                 staticSequenceLocked = false;
               }, 9000);
             });
+
+           function getSwitchVMI() {
+  return r.viewModelInstance.viewModel("propertyOfVMSwitch");
+}
+
+function syncLightsOverlay() {
+  const switchVMI = getSwitchVMI();
+  const isOn = switchVMI.boolean("onOff").value;
+
+  document
+    .getElementById("lights-overlay")
+    .classList.toggle("active", isOn);
+}
+
+// Set initial state once on load
+syncLightsOverlay();
+
+// Poll for changes from Rive
+setInterval(syncLightsOverlay, 100);
+            
           } catch (err) {
             console.error("Sheet load failed:", err);
           }
@@ -284,6 +325,9 @@ body::before {
 
       window.addEventListener("resize", resizeRive);
     });
+
+
+    
   </script>
 </body>
 </html>
