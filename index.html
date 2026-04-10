@@ -152,6 +152,22 @@ body::before {
 #lights-overlay.active {
   opacity: 1;
 }
+
+#volume-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10000;
+  user-select: none;
+  transition: transform 0.1s ease;
+}
+
+#volume-toggle:hover {
+  transform: scale(1.1);
+}
+
 </style>
 
   <script src="https://unpkg.com/@rive-app/webgl2"></script>
@@ -168,6 +184,7 @@ body::before {
   </div>
 
   <div id="lights-overlay"></div>
+  <div id="volume-toggle">🔊</div>
 
   <script>
     const canvas = document.getElementById("rive-canvas");
@@ -326,6 +343,21 @@ setInterval(syncLightsOverlay, 100);
       window.addEventListener("resize", resizeRive);
     });
 
+let isMuted = false;
+
+const volumeToggle = document.getElementById("volume-toggle");
+
+volumeToggle.addEventListener("click", () => {
+  isMuted = !isMuted;
+
+  // Update emoji
+  volumeToggle.textContent = isMuted ? "🔇" : "🔊";
+
+  // Mute/unmute all audio elements on the page
+  document.querySelectorAll("audio").forEach(audio => {
+    audio.muted = isMuted;
+  });
+});
 
     
   </script>
