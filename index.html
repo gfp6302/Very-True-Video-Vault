@@ -6,176 +6,280 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-:root {
-  --bg-teal: #2E474F;
-  --wall-brown: #472A29;
-  --wall-height: 621px;
-}
+    :root {
+      --bg-teal: #2E474F;
+      --wall-brown: #472A29;
+      --wall-height: 621px;
+    }
 
-html, body {
-  margin: 0;
-  min-height: 100%;
-  background: var(--bg-teal);
-  overflow: hidden;
-}
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg-teal);
+      overflow: hidden;
+    }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--wall-height);
-  background: var(--wall-brown);
-  z-index: 0;
-  pointer-events: none;
-}
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--wall-height);
+      background: var(--wall-brown);
+      z-index: 0;
+      pointer-events: none;
+    }
 
-.frame {
-  position: relative;
-  min-height: 100vh;
-  width: auto;
-  background: transparent;
-  overflow: hidden;
-  z-index: 1;
-}
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background: #2E474F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
 
-  .wall-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 0;
-  pointer-events: none;
-}
+    #page-loader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
 
-  .scene-holder {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
-  }
+    .logo-loader {
+      width: min(620px, 80vw);
+      position: relative;
+    }
 
-  .canvas-wrap {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-  }
+    .loader-shell {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 516 / 149;
+      overflow: visible;
+      background: transparent;
+    }
 
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+    #loader-logo {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
 
-  @media (min-width: 3004px) {
-  :root {
-    --wall-height: 621px;
-  }
+    .frame {
+      position: relative;
+      min-height: 100vh;
+      width: auto;
+      background: transparent;
+      overflow: hidden;
+      z-index: 1;
+    }
 
-  .frame {
-    width: 3004px;
-  }
+    .wall-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-  .scene-holder {
-    height: 865px;
-  }
-}
+    .scene-holder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1;
+    }
 
-@media (min-width: 810px) and (max-width: 3003.98px) {
-  :root {
-    --wall-height: 621px;
-  }
+    .canvas-wrap {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
 
-  .frame {
-    width: 1600px;
-    max-width: 100vw;
-  }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
 
-  .scene-holder {
-    height: 865px;
-  }
-}
+    @media (min-width: 3004px) {
+      :root {
+        --wall-height: 621px;
+      }
 
-@media (max-width: 809.98px) {
-  :root {
-    --wall-height: 0px;
-  }
+      .frame {
+        width: 3004px;
+      }
 
-  .frame {
-    width: 100vw;
-  }
+      .scene-holder {
+        height: 865px;
+      }
+    }
 
-  .scene-holder {
-    height: 540px;
-    left: 0;
-    right: 0;
-  }
+    @media (min-width: 810px) and (max-width: 3003.98px) {
+      :root {
+        --wall-height: 621px;
+      }
 
-  .canvas-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-  }
+      .frame {
+        width: 1600px;
+        max-width: 100vw;
+      }
 
-  canvas {
-    width: 760px;
-    height: 100%;
-    max-width: none;
-  }
-}
+      .scene-holder {
+        height: 865px;
+      }
+    }
 
-/* LIGHTS OUT OVERLAY */
-#lights-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #4017D2;
-  mix-blend-mode: soft-light;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  z-index: 9999;
-}
+    @media (max-width: 809.98px) {
+      :root {
+        --wall-height: 0px;
+      }
 
-#lights-overlay.active {
-  opacity: 1;
-}
+      .frame {
+        width: 100vw;
+      }
 
-#volume-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  font-size: 28px;
-  cursor: pointer;
-  z-index: 10000;
-  user-select: none;
-  transition: transform 0.1s ease;
-}
+      .scene-holder {
+        height: 540px;
+        left: 0;
+        right: 0;
+      }
 
-#volume-toggle:hover {
-  transform: scale(1.1);
-}
+      .canvas-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
 
-</style>
+      canvas {
+        width: 760px;
+        height: 100%;
+        max-width: none;
+      }
+    }
+
+    #lights-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #4017D2;
+      mix-blend-mode: soft-light;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 9999;
+    }
+
+    #lights-overlay.active {
+      opacity: 1;
+    }
+
+    #volume-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 10000;
+      user-select: none;
+      transition: transform 0.1s ease;
+    }
+
+    #volume-toggle:hover {
+      transform: scale(1.1);
+    }
+  </style>
 
   <script src="https://unpkg.com/@rive-app/webgl2"></script>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
-  <div class="frame">
+  <div id="page-loader">
+    <div class="logo-loader">
+      <div class="loader-shell">
+        <svg
+          id="loader-logo"
+          viewBox="0 0 516 149"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <clipPath id="logo-clip">
+<path d="M11.8781 149.007V104.143H478.422C479.073 104.143 479.55 104.754 479.393 105.386L469.019 146.929C468.711 148.148 467.557 149.007 466.236 149.007H11.8781Z" fill="#F85425"/>
+<path d="M93.8204 91.8693L109.339 25.7536C109.634 24.3941 110.609 23.522 111.776 23.522H135.221C151.151 24.6891 158.666 38.5535 153.985 58.8179C149.535 77.9664 136.799 91.2537 121.485 93.7162C120.113 93.9342 118.728 94.024 117.33 94.024L95.2824 94.1138C94.1153 94.1138 93.5254 93.2416 93.8204 91.8821V91.8693ZM115.111 76.6454H121.19C121.613 76.6454 122.049 76.6197 122.473 76.53C128.295 75.2859 133.746 68.5396 136.004 58.9974C138.248 49.0063 135.811 41.8368 130.04 40.9647H123.268C122.485 40.9647 121.806 41.5034 121.626 42.2601L113.956 75.1961C113.79 75.9271 114.341 76.6325 115.098 76.6325L115.111 76.6454Z" fill="#FDF3E4"/>
+<path d="M202.093 58.9077C207.07 37.2838 222.127 22.9448 239.711 22.9448C257.295 22.9448 265.4 37.2966 260.424 58.9077C255.448 80.3391 240.493 94.6781 223.012 94.6781C205.531 94.6781 197.117 80.3263 202.106 58.9077H202.093ZM227.001 77.4278C233.747 77.5304 240.096 70.0531 242.725 59.0103C245.264 47.9547 242.34 40.2978 235.594 40.1952C228.95 40.0926 222.499 47.5571 219.959 58.6127C217.317 69.6683 220.254 77.3251 226.988 77.4278H227.001Z" fill="#FDF3E4"/>
+<path d="M280.996 23.522H293.604C294.386 23.522 295.066 24.0991 294.976 25.0739L296.964 61.9216C297.015 62.7809 298.157 63.0246 298.554 62.2679L317.741 25.0739C318.331 24.0991 319.203 23.522 319.986 23.522H332.593C334.158 23.522 334.645 24.6891 333.671 26.4334L299.478 92.549C298.99 93.5238 298.105 94.1009 297.323 94.1009H283.446C282.663 94.1009 281.984 93.5238 281.984 92.549L278.47 26.4334C278.367 24.6891 279.444 23.522 281.009 23.522H280.996Z" fill="#FDF3E4"/>
+<path d="M369.416 63.076L378.111 25.7536C378.406 24.3941 379.381 23.522 380.548 23.522H393.348C394.515 23.522 395.015 24.3941 394.72 25.7536L386.32 61.9216C384.563 69.2963 384.755 74.9139 392.078 74.9139C398.825 74.9139 402.044 69.4887 403.609 62.6014L412.202 25.7536C412.497 24.3941 413.471 23.522 414.638 23.522H427.438C428.606 23.522 429.196 24.3941 428.901 25.7536L420.205 63.076C415.908 80.6213 403.403 94.2933 387.577 94.2933C371.75 94.2933 365.696 80.9163 369.403 63.076H369.416Z" fill="#FDF3E4"/>
+<path d="M78.9554 14.4672V0H514.524C515.473 0 516.178 0.884967 515.96 1.80841L513.254 13.3386C513.1 14.0055 512.51 14.4672 511.818 14.4672H78.9554Z" fill="#F85425"/>
+<path d="M367.8 91.6001C365.286 88.881 362.169 83.3532 361.605 72.4387L359.155 25.1637C359.053 24.2916 358.565 23.6118 357.693 23.6118H343.816C342.931 23.6118 342.059 24.2916 341.571 25.1637L307.481 91.1896C306.596 92.9339 307.096 94.101 308.648 94.101H321.256C322.038 94.101 322.923 93.5239 323.41 92.5491L328.22 83.1865C328.502 82.6222 329.079 82.2759 329.721 82.2759H344.303C344.97 82.2759 345.522 82.8017 345.56 83.4687L346.073 92.562C345.97 93.5367 346.663 94.1138 347.445 94.1138H360.053C360.053 94.1138 360.156 94.1138 360.22 94.101L366.748 94.0754C368.03 94.0754 368.697 92.5491 367.825 91.6128L367.8 91.6001ZM343.906 68.2062H337.39C336.762 68.2062 336.351 67.5393 336.646 66.975L342.238 56.1502C342.713 55.2396 344.072 55.5346 344.136 56.5478L344.752 67.3085C344.778 67.7958 344.393 68.1934 343.918 68.1934L343.906 68.2062Z" fill="#FDF3E4"/>
+<path d="M461.965 76.1581H442.098C441.021 76.1581 440.213 75.1449 440.456 74.0932L451.704 25.7409C451.999 24.3814 451.409 23.5093 450.332 23.5093H438.02C436.852 23.5093 435.865 24.3814 435.583 25.7409L427.669 59.6517C423.18 78.8772 415.036 87.7268 409.855 91.5744C408.713 92.4209 409.342 94.2293 410.765 94.2165L421.231 94.0883V94.0498C421.359 94.0755 421.487 94.0883 421.629 94.0883H457.771C458.938 94.0883 459.926 93.2161 460.208 91.8566L463.337 78.377C463.722 77.0175 463.145 76.1453 461.965 76.1453V76.1581Z" fill="#FDF3E4"/>
+<path d="M212.841 23.458H156.024C154.742 23.458 154.075 24.9714 154.934 25.9205C167.311 39.4002 159.641 63.0376 159.641 63.0376C159.218 64.6152 158.666 66.2697 158.025 67.9498C157.974 68.0781 157.922 68.2063 157.884 68.3346C157.371 69.6556 156.807 70.9895 156.204 72.3233C151.625 81.904 144.763 88.1629 140.48 91.4078C139.351 92.2543 139.954 94.0498 141.365 94.0498H155.383H167.195H183.214L199.439 94.0626C200.734 94.0626 201.388 92.5236 200.503 91.5745C196.45 87.2907 194.911 80.288 194.424 77.4023C194.296 76.6584 193.654 76.1069 192.885 76.1069H191.32C191.32 76.1069 191.307 76.1069 191.295 76.1069H173.903C173.198 76.1069 172.685 75.4528 172.839 74.773L174.685 66.6544C174.865 65.8849 175.545 65.3462 176.327 65.3462H190.127H192.859C193.616 65.3462 194.257 64.8076 194.385 64.0637C195.245 59.1259 196.207 55.3808 196.809 53.2646C197.092 52.277 196.348 51.2894 195.309 51.2894H179.675C178.969 51.2894 178.456 50.6353 178.61 49.9556L180.252 42.7091C180.431 41.9396 181.111 41.4009 181.893 41.4009H198.631H200.337C200.939 41.4009 201.491 41.0418 201.747 40.4903C202.889 38.0278 206.557 31.0507 213.688 26.1514C214.881 25.3305 214.304 23.458 212.867 23.458H212.841Z" fill="#FDF3E4"/>
+<path d="M320.23 134.63H182.265C181.316 134.63 180.624 133.745 180.829 132.821L183.804 119.906C183.984 119.098 184.702 118.534 185.523 118.534H323.282C324.231 118.534 324.937 119.419 324.719 120.342L321.641 133.488C321.487 134.155 320.897 134.63 320.204 134.63H320.23Z" fill="#FDF3E4"/>
+<path d="M350.241 119.611L347.138 132.898C346.92 133.822 347.625 134.707 348.574 134.707H352.127C353.358 134.707 354.589 134.322 355.551 133.552C357.257 132.193 359.399 129.307 359.809 123.292C359.809 123.292 359.899 121.727 359.425 120.381C359.04 119.278 358.001 118.547 356.847 118.534L351.691 118.482C350.998 118.482 350.395 118.944 350.241 119.624V119.611Z" fill="#FDF3E4"/>
+<path d="M155.319 133.629L158.422 120.342C158.64 119.419 157.935 118.534 156.986 118.534H153.433C152.202 118.534 150.971 118.919 150.009 119.688C148.303 121.048 146.161 123.933 145.751 129.949C145.751 129.949 145.661 131.513 146.136 132.86C146.52 133.963 147.559 134.694 148.713 134.707L153.869 134.758C154.562 134.758 155.165 134.296 155.319 133.617V133.629Z" fill="#FDF3E4"/>
+<path d="M101.349 23.522H89.0364C87.8692 23.522 86.8817 24.3941 86.5995 25.7536L82.3927 43.7607C80.0072 52.8027 74.4794 70.2454 63.2058 91.3691C62.5388 92.6132 63.4494 94.1009 64.8474 94.1009H84.9322C86.0096 94.1009 86.9843 93.2288 87.2793 91.8693L102.721 25.7536C103.016 24.3941 102.426 23.522 101.349 23.522Z" fill="#FDF3E4"/>
+<path d="M90.8705 0H69.5032C68.1437 0 66.9765 0.987577 66.7585 2.33426C64.8347 14.2235 58.7425 63.6788 33.5788 77.5048L51.7013 2.32144C52.0091 0.91063 51.3935 0 50.2777 0H37.4522C36.2337 0 35.2077 0.91063 34.9127 2.32144L0.0785059 146.686C-0.229307 148.097 0.386322 149.007 1.60475 149.007H14.5329C15.4051 149.007 16.2259 148.635 16.803 147.981C23.716 140.119 67.7589 88.1372 78.8274 29.3962C79.9945 23.1758 82.0594 17.1478 85.1888 11.6584C87.0357 8.41357 89.3059 5.20718 91.9736 2.97554C93.1792 1.96232 92.4481 0 90.8705 0Z" fill="#FDF3E4"/>
+<path d="M509.458 23.5348H460.644C459.477 23.5348 458.592 24.4069 458.297 25.7664L456.386 33.9748L453.654 45.3639C453.333 46.6977 454.962 47.5827 455.911 46.5951C458.476 43.9402 462.414 41.4392 468.095 41.4649H476.457C477.535 41.4649 478.343 42.4781 478.099 43.5298L466.723 91.8565C466.428 93.216 467.018 94.0881 468.185 94.0881H480.395C481.562 94.0881 482.55 93.216 482.832 91.8565L494.388 42.7603C494.567 42.0036 495.247 41.4649 496.029 41.4649H505.251C506.418 41.4649 507.406 40.5928 507.79 39.2333L510.92 25.7536C511.215 24.3941 510.625 23.522 509.458 23.522V23.5348Z" fill="#FDF3E4"/>
 
+            </clipPath>
+          </defs>
+
+<path d="M11.8781 149.007V104.143H478.422C479.073 104.143 479.55 104.754 479.393 105.386L469.019 146.929C468.711 148.148 467.557 149.007 466.236 149.007H11.8781Z" fill="#F85425"/>
+<path d="M93.8204 91.8693L109.339 25.7536C109.634 24.3941 110.609 23.522 111.776 23.522H135.221C151.151 24.6891 158.666 38.5535 153.985 58.8179C149.535 77.9664 136.799 91.2537 121.485 93.7162C120.113 93.9342 118.728 94.024 117.33 94.024L95.2824 94.1138C94.1153 94.1138 93.5254 93.2416 93.8204 91.8821V91.8693ZM115.111 76.6454H121.19C121.613 76.6454 122.049 76.6197 122.473 76.53C128.295 75.2859 133.746 68.5396 136.004 58.9974C138.248 49.0063 135.811 41.8368 130.04 40.9647H123.268C122.485 40.9647 121.806 41.5034 121.626 42.2601L113.956 75.1961C113.79 75.9271 114.341 76.6325 115.098 76.6325L115.111 76.6454Z" fill="#FDF3E4"/>
+<path d="M202.093 58.9077C207.07 37.2838 222.127 22.9448 239.711 22.9448C257.295 22.9448 265.4 37.2966 260.424 58.9077C255.448 80.3391 240.493 94.6781 223.012 94.6781C205.531 94.6781 197.117 80.3263 202.106 58.9077H202.093ZM227.001 77.4278C233.747 77.5304 240.096 70.0531 242.725 59.0103C245.264 47.9547 242.34 40.2978 235.594 40.1952C228.95 40.0926 222.499 47.5571 219.959 58.6127C217.317 69.6683 220.254 77.3251 226.988 77.4278H227.001Z" fill="#FDF3E4"/>
+<path d="M280.996 23.522H293.604C294.386 23.522 295.066 24.0991 294.976 25.0739L296.964 61.9216C297.015 62.7809 298.157 63.0246 298.554 62.2679L317.741 25.0739C318.331 24.0991 319.203 23.522 319.986 23.522H332.593C334.158 23.522 334.645 24.6891 333.671 26.4334L299.478 92.549C298.99 93.5238 298.105 94.1009 297.323 94.1009H283.446C282.663 94.1009 281.984 93.5238 281.984 92.549L278.47 26.4334C278.367 24.6891 279.444 23.522 281.009 23.522H280.996Z" fill="#FDF3E4"/>
+<path d="M369.416 63.076L378.111 25.7536C378.406 24.3941 379.381 23.522 380.548 23.522H393.348C394.515 23.522 395.015 24.3941 394.72 25.7536L386.32 61.9216C384.563 69.2963 384.755 74.9139 392.078 74.9139C398.825 74.9139 402.044 69.4887 403.609 62.6014L412.202 25.7536C412.497 24.3941 413.471 23.522 414.638 23.522H427.438C428.606 23.522 429.196 24.3941 428.901 25.7536L420.205 63.076C415.908 80.6213 403.403 94.2933 387.577 94.2933C371.75 94.2933 365.696 80.9163 369.403 63.076H369.416Z" fill="#FDF3E4"/>
+<path d="M78.9554 14.4672V0H514.524C515.473 0 516.178 0.884967 515.96 1.80841L513.254 13.3386C513.1 14.0055 512.51 14.4672 511.818 14.4672H78.9554Z" fill="#F85425"/>
+<path d="M367.8 91.6001C365.286 88.881 362.169 83.3532 361.605 72.4387L359.155 25.1637C359.053 24.2916 358.565 23.6118 357.693 23.6118H343.816C342.931 23.6118 342.059 24.2916 341.571 25.1637L307.481 91.1896C306.596 92.9339 307.096 94.101 308.648 94.101H321.256C322.038 94.101 322.923 93.5239 323.41 92.5491L328.22 83.1865C328.502 82.6222 329.079 82.2759 329.721 82.2759H344.303C344.97 82.2759 345.522 82.8017 345.56 83.4687L346.073 92.562C345.97 93.5367 346.663 94.1138 347.445 94.1138H360.053C360.053 94.1138 360.156 94.1138 360.22 94.101L366.748 94.0754C368.03 94.0754 368.697 92.5491 367.825 91.6128L367.8 91.6001ZM343.906 68.2062H337.39C336.762 68.2062 336.351 67.5393 336.646 66.975L342.238 56.1502C342.713 55.2396 344.072 55.5346 344.136 56.5478L344.752 67.3085C344.778 67.7958 344.393 68.1934 343.918 68.1934L343.906 68.2062Z" fill="#FDF3E4"/>
+<path d="M461.965 76.1581H442.098C441.021 76.1581 440.213 75.1449 440.456 74.0932L451.704 25.7409C451.999 24.3814 451.409 23.5093 450.332 23.5093H438.02C436.852 23.5093 435.865 24.3814 435.583 25.7409L427.669 59.6517C423.18 78.8772 415.036 87.7268 409.855 91.5744C408.713 92.4209 409.342 94.2293 410.765 94.2165L421.231 94.0883V94.0498C421.359 94.0755 421.487 94.0883 421.629 94.0883H457.771C458.938 94.0883 459.926 93.2161 460.208 91.8566L463.337 78.377C463.722 77.0175 463.145 76.1453 461.965 76.1453V76.1581Z" fill="#FDF3E4"/>
+<path d="M212.841 23.458H156.024C154.742 23.458 154.075 24.9714 154.934 25.9205C167.311 39.4002 159.641 63.0376 159.641 63.0376C159.218 64.6152 158.666 66.2697 158.025 67.9498C157.974 68.0781 157.922 68.2063 157.884 68.3346C157.371 69.6556 156.807 70.9895 156.204 72.3233C151.625 81.904 144.763 88.1629 140.48 91.4078C139.351 92.2543 139.954 94.0498 141.365 94.0498H155.383H167.195H183.214L199.439 94.0626C200.734 94.0626 201.388 92.5236 200.503 91.5745C196.45 87.2907 194.911 80.288 194.424 77.4023C194.296 76.6584 193.654 76.1069 192.885 76.1069H191.32C191.32 76.1069 191.307 76.1069 191.295 76.1069H173.903C173.198 76.1069 172.685 75.4528 172.839 74.773L174.685 66.6544C174.865 65.8849 175.545 65.3462 176.327 65.3462H190.127H192.859C193.616 65.3462 194.257 64.8076 194.385 64.0637C195.245 59.1259 196.207 55.3808 196.809 53.2646C197.092 52.277 196.348 51.2894 195.309 51.2894H179.675C178.969 51.2894 178.456 50.6353 178.61 49.9556L180.252 42.7091C180.431 41.9396 181.111 41.4009 181.893 41.4009H198.631H200.337C200.939 41.4009 201.491 41.0418 201.747 40.4903C202.889 38.0278 206.557 31.0507 213.688 26.1514C214.881 25.3305 214.304 23.458 212.867 23.458H212.841Z" fill="#FDF3E4"/>
+<path d="M320.23 134.63H182.265C181.316 134.63 180.624 133.745 180.829 132.821L183.804 119.906C183.984 119.098 184.702 118.534 185.523 118.534H323.282C324.231 118.534 324.937 119.419 324.719 120.342L321.641 133.488C321.487 134.155 320.897 134.63 320.204 134.63H320.23Z" fill="#FDF3E4"/>
+<path d="M350.241 119.611L347.138 132.898C346.92 133.822 347.625 134.707 348.574 134.707H352.127C353.358 134.707 354.589 134.322 355.551 133.552C357.257 132.193 359.399 129.307 359.809 123.292C359.809 123.292 359.899 121.727 359.425 120.381C359.04 119.278 358.001 118.547 356.847 118.534L351.691 118.482C350.998 118.482 350.395 118.944 350.241 119.624V119.611Z" fill="#FDF3E4"/>
+<path d="M155.319 133.629L158.422 120.342C158.64 119.419 157.935 118.534 156.986 118.534H153.433C152.202 118.534 150.971 118.919 150.009 119.688C148.303 121.048 146.161 123.933 145.751 129.949C145.751 129.949 145.661 131.513 146.136 132.86C146.52 133.963 147.559 134.694 148.713 134.707L153.869 134.758C154.562 134.758 155.165 134.296 155.319 133.617V133.629Z" fill="#FDF3E4"/>
+<path d="M101.349 23.522H89.0364C87.8692 23.522 86.8817 24.3941 86.5995 25.7536L82.3927 43.7607C80.0072 52.8027 74.4794 70.2454 63.2058 91.3691C62.5388 92.6132 63.4494 94.1009 64.8474 94.1009H84.9322C86.0096 94.1009 86.9843 93.2288 87.2793 91.8693L102.721 25.7536C103.016 24.3941 102.426 23.522 101.349 23.522Z" fill="#FDF3E4"/>
+<path d="M90.8705 0H69.5032C68.1437 0 66.9765 0.987577 66.7585 2.33426C64.8347 14.2235 58.7425 63.6788 33.5788 77.5048L51.7013 2.32144C52.0091 0.91063 51.3935 0 50.2777 0H37.4522C36.2337 0 35.2077 0.91063 34.9127 2.32144L0.0785059 146.686C-0.229307 148.097 0.386322 149.007 1.60475 149.007H14.5329C15.4051 149.007 16.2259 148.635 16.803 147.981C23.716 140.119 67.7589 88.1372 78.8274 29.3962C79.9945 23.1758 82.0594 17.1478 85.1888 11.6584C87.0357 8.41357 89.3059 5.20718 91.9736 2.97554C93.1792 1.96232 92.4481 0 90.8705 0Z" fill="#FDF3E4"/>
+<path d="M509.458 23.5348H460.644C459.477 23.5348 458.592 24.4069 458.297 25.7664L456.386 33.9748L453.654 45.3639C453.333 46.6977 454.962 47.5827 455.911 46.5951C458.476 43.9402 462.414 41.4392 468.095 41.4649H476.457C477.535 41.4649 478.343 42.4781 478.099 43.5298L466.723 91.8565C466.428 93.216 467.018 94.0881 468.185 94.0881H480.395C481.562 94.0881 482.55 93.216 482.832 91.8565L494.388 42.7603C494.567 42.0036 495.247 41.4649 496.029 41.4649H505.251C506.418 41.4649 507.406 40.5928 507.79 39.2333L510.92 25.7536C511.215 24.3941 510.625 23.522 509.458 23.522V23.5348Z" fill="#FDF3E4"/>
+
+
+          <!-- SHIMMER -->
+          <rect
+            x="-220"
+            y="0"
+            width="60"
+            height="149"
+            fill="#D6B88C"
+            clip-path="url(#logo-clip)"
+            opacity="1"
+          >
+            <animate
+              attributeName="x"
+              from="-220"
+              to="516"
+              dur="0.9s"
+              repeatCount="indefinite"
+            />
+          </rect>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame">
     <div class="scene-holder">
       <div class="canvas-wrap">
         <canvas id="rive-canvas" width="1877" height="1080"></canvas>
@@ -188,6 +292,7 @@ body::before {
 
   <script>
     const canvas = document.getElementById("rive-canvas");
+    const volumeToggle = document.getElementById("volume-toggle");
 
     const SHEET_ID = "1XH9UmWCr_foe9-QFDNfpLVWKh9iSl2TStAZzncKG13E";
     const SHEET_NAME = "Sheet1";
@@ -196,11 +301,17 @@ body::before {
     let sheetRows = [];
     let lastRowIndex = -1;
     let staticSequenceLocked = false;
+    let lightsOverlayInterval = null;
+    let isMuted = false;
 
     function resizeRive() {
       if (r) {
         r.resizeDrawingSurfaceToCanvas();
       }
+    }
+
+    function hideLoader() {
+      document.getElementById("page-loader")?.classList.add("is-hidden");
     }
 
     function getPopupVMI() {
@@ -212,6 +323,21 @@ body::before {
         .viewModel("propertyOfVMTV")
         .viewModel("propertyOfVMStatic")
         .trigger("staticSequence");
+    }
+
+    function getSwitchVMI() {
+      return r.viewModelInstance.viewModel("propertyOfVMSwitch");
+    }
+
+    function syncLightsOverlay() {
+      if (!r || !r.viewModelInstance) return;
+
+      const switchVMI = getSwitchVMI();
+      const isOn = switchVMI.boolean("onOff").value;
+
+      document
+        .getElementById("lights-overlay")
+        .classList.toggle("active", isOn);
     }
 
     function setPopupText(headline, subhead) {
@@ -281,85 +407,72 @@ body::before {
       resizeRive();
     }
 
-    google.charts.load("current", { packages: ["table"] });
-    google.charts.setOnLoadCallback(() => {
-      r = new rive.Rive({
-        src: "vts_video_vault_master.riv",
-        canvas: canvas,
-        autoplay: true,
-        autoBind: true,
-        artboard: "VTS VIDEO DEN 02",
-        stateMachines: "State Machine 1",
+    function startApp() {
+  google.charts.load("current", { packages: ["table"] });
 
-        onLoad: async () => {
-          resizeRive();
+  google.charts.setOnLoadCallback(() => {
+    r = new rive.Rive({
+      src: "vts_video_vault_master.riv",
+      canvas: canvas,
+      autoplay: true,
+      autoBind: true,
+      artboard: "VTS VIDEO DEN 02",
+      stateMachines: "State Machine 1",
 
-          try {
-            sheetRows = await querySheetRows();
+      onLoad: async () => {
+        resizeRive();
+
+        try {
+          sheetRows = await querySheetRows();
+          applyRandomPopupText();
+
+          const staticSequenceTrigger = getStaticSequenceTrigger();
+
+          staticSequenceTrigger.on(() => {
+            if (staticSequenceLocked) return;
+
+            staticSequenceLocked = true;
             applyRandomPopupText();
 
-            const staticSequenceTrigger = getStaticSequenceTrigger();
+            setTimeout(() => {
+              staticSequenceLocked = false;
+            }, 9000);
+          });
 
-            staticSequenceTrigger.on(() => {
-              if (staticSequenceLocked) return;
+          syncLightsOverlay();
 
-              staticSequenceLocked = true;
-              applyRandomPopupText();
-
-              setTimeout(() => {
-                staticSequenceLocked = false;
-              }, 9000);
-            });
-
-           function getSwitchVMI() {
-  return r.viewModelInstance.viewModel("propertyOfVMSwitch");
-}
-
-function syncLightsOverlay() {
-  const switchVMI = getSwitchVMI();
-  const isOn = switchVMI.boolean("onOff").value;
-
-  document
-    .getElementById("lights-overlay")
-    .classList.toggle("active", isOn);
-}
-
-// Set initial state once on load
-syncLightsOverlay();
-
-// Poll for changes from Rive
-setInterval(syncLightsOverlay, 100);
-            
-          } catch (err) {
-            console.error("Sheet load failed:", err);
+          if (!lightsOverlayInterval) {
+            lightsOverlayInterval = setInterval(syncLightsOverlay, 100);
           }
-        },
 
-        onLoadError: (err) => {
-          console.error("Rive load error:", err);
+          hideLoader();
+        } catch (err) {
+          console.error("Sheet load failed:", err);
+          hideLoader();
         }
-      });
+      },
 
-      window.addEventListener("resize", resizeRive);
+      onLoadError: (err) => {
+        console.error("Rive load error:", err);
+        hideLoader();
+      }
     });
 
-let isMuted = false;
+    window.addEventListener("resize", resizeRive);
+  });
+}
 
-const volumeToggle = document.getElementById("volume-toggle");
-
-volumeToggle.addEventListener("click", () => {
-  isMuted = !isMuted;
-
-  // Update emoji
-  volumeToggle.textContent = isMuted ? "🔇" : "🔊";
-
-  // Mute/unmute all audio elements on the page
-  document.querySelectorAll("audio").forEach(audio => {
-    audio.muted = isMuted;
+// Let the loader paint first, then start heavy work
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    setTimeout(startApp, 0);
   });
 });
 
-    
+    volumeToggle.addEventListener("click", () => {
+      isMuted = !isMuted;
+      volumeToggle.textContent = isMuted ? "🔇" : "🔊";
+    });
   </script>
 </body>
 </html>
