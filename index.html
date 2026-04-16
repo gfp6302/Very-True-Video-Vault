@@ -142,18 +142,34 @@
     }
 
     @media (max-width: 809.98px) {
-      :root { --wall-height: 0px; }
+  :root {
+    --wall-height: 365px;
+  }
 
-      .frame { width: 100vw; }
+  .frame {
+    width: 100vw;
+  }
 
-      .scene-holder { height: 540px; }
+  .scene-holder {
+    height: 540px;
+    left: 0;
+    right: 0;
+  }
 
-      canvas {
-        width: 760px;
-        height: 100%;
-        max-width: none;
-      }
-    }
+  .canvas-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;
+  }
+
+  canvas {
+    width: 760px;
+    height: 100%;
+    max-width: none;
+    flex: 0 0 auto;
+  }
+}
 
     #lights-overlay {
       position: fixed;
