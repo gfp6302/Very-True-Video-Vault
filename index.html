@@ -116,34 +116,92 @@
       z-index: 1;
     }
 
-    .canvas-wrap {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
+   .canvas-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+/* DESKTOP / TABLET DEFAULTS */
+:root {
+  --scene-width: 1600px;
+  --ext-height: calc(var(--scene-width) * 270 / 1877);
+  --main-height: calc(var(--scene-width) * 1080 / 1877);
+  --scene-total-height: calc(var(--ext-height) + var(--main-height));
 
-    @media (min-width: 3004px) {
-      .frame { width: 3004px; }
-      .scene-holder { height: 865px; }
-    }
+  /* NEW: wall side strips stop at floor line */
+  --wall-side-height: calc(var(--scene-width) * 1045 / 1877);
+}
 
-    @media (min-width: 810px) and (max-width: 3003.98px) {
-      .frame {
-        width: 1600px;
-        max-width: 100vw;
-      }
-      .scene-holder { height: 865px; }
-    }
+#wall-extension-canvas,
+#rive-canvas {
+  display: block;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--scene-width);
+  max-width: none;
+}
 
-    @media (max-width: 809.98px) {
+#wall-extension-canvas {
+  top: 0;
+  height: var(--ext-height);
+  z-index: 2;
+  pointer-events: none;
+}
+
+#rive-canvas {
+  top: var(--ext-height);
+  height: var(--main-height);
+  z-index: 1;
+}
+
+@media (min-width: 3004px) {
+  :root {
+    --scene-width: 3004px;
+    --ext-height: calc(var(--scene-width) * 270 / 1877);
+    --main-height: calc(var(--scene-width) * 1080 / 1877);
+    --scene-total-height: calc(var(--ext-height) + var(--main-height));
+    --wall-side-height: calc(var(--scene-width) * 1045 / 1877);
+  }
+
+  .frame {
+    width: 3004px;
+  }
+
+  .scene-holder {
+    height: var(--scene-total-height);
+  }
+}
+
+@media (min-width: 810px) and (max-width: 3003.98px) {
+  :root {
+    --scene-width: 1600px;
+    --ext-height: calc(var(--scene-width) * 270 / 1877);
+    --main-height: calc(var(--scene-width) * 1080 / 1877);
+    --scene-total-height: calc(var(--ext-height) + var(--main-height));
+  }
+
+  .frame {
+    width: 1600px;
+    max-width: 100vw;
+  }
+
+  .scene-holder {
+    height: var(--scene-total-height);
+  }
+}
+
+@media (max-width: 809.98px) {
   :root {
     --wall-height: 365px;
+
+    --scene-width: 760px;
+    --ext-height: calc(var(--scene-width) * 270 / 1877);
+    --main-height: calc(var(--scene-width) * 1080 / 1877);
+    --scene-total-height: calc(var(--ext-height) + var(--main-height));
+    --wall-side-height: calc(var(--scene-width) * 1045 / 1877);
   }
 
   .frame {
@@ -151,24 +209,41 @@
   }
 
   .scene-holder {
-    height: 540px;
+    height: var(--scene-total-height);
     left: 0;
     right: 0;
   }
 
-  .canvas-wrap {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow: hidden;
-  }
-
-  canvas {
-    width: 760px;
-    height: 100%;
+  #wall-extension-canvas,
+  #rive-canvas {
+    width: var(--scene-width);
     max-width: none;
-    flex: 0 0 auto;
+    left: 50%;
+    transform: translateX(-50%);
   }
+}
+
+.wall-side {
+  position: fixed;
+  top: 0;
+  height: var(--wall-side-height);
+  width: max(0px, calc((100vw - var(--scene-width)) / 2));
+  background-color: var(--wall-brown);
+  background-image: url("wall_side_tile.svg");
+  background-repeat: repeat-x;
+  background-size: 36px var(--wall-side-height);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wall-side.left {
+  left: 0;
+  background-position: top right;
+}
+
+.wall-side.right {
+  right: 0;
+  background-position: top right;
 }
 
     #lights-overlay {
@@ -237,10 +312,14 @@
     </div>
   </div>
 
+  <div class="wall-side left"></div>
+  <div class="wall-side right"></div>
+
   <!-- APP -->
   <div class="frame">
     <div class="scene-holder">
       <div class="canvas-wrap">
+        <canvas id="wall-extension-canvas" width="1877" height="270"></canvas>
         <canvas id="rive-canvas" width="1877" height="1080"></canvas>
       </div>
     </div>
@@ -251,12 +330,14 @@
 
   <script>
     const canvas = document.getElementById("rive-canvas");
+    const wallExtensionCanvas = document.getElementById("wall-extension-canvas");
     const volumeToggle = document.getElementById("volume-toggle");
 
     const SHEET_ID = "1XH9UmWCr_foe9-QFDNfpLVWKh9iSl2TStAZzncKG13E";
     const SHEET_NAME = "Sheet1";
 
     let r;
+    let wallExtensionRive;
     let sheetRows = [];
     let lastRowIndex = -1;
     let staticSequenceLocked = false;
@@ -264,10 +345,14 @@
     let isMuted = false;
 
     function resizeRive() {
-      if (r) {
-        r.resizeDrawingSurfaceToCanvas();
-      }
-    }
+  if (r) {
+    r.resizeDrawingSurfaceToCanvas();
+  }
+
+  if (wallExtensionRive) {
+    wallExtensionRive.resizeDrawingSurfaceToCanvas();
+  }
+}
 
     function hideLoader() {
       document.getElementById("page-loader")?.classList.add("is-hidden");
@@ -393,38 +478,47 @@
     }
 
     function startApp() {
-      r = new rive.Rive({
-        src: "vts_video_vault_master.riv",
-        canvas: canvas,
-        autoplay: true,
-        autoBind: true,
-        artboard: "VTS VIDEO DEN 02",
-        stateMachines: "State Machine 1",
-
-        onLoad: () => {
-          resizeRive();
-
-          syncLightsOverlay();
-
-          if (!lightsOverlayInterval) {
-            lightsOverlayInterval = setInterval(syncLightsOverlay, 100);
-          }
-
-          hideLoader();
-
-          setTimeout(() => {
-            loadGoogleChartsAndSheetData();
-          }, 3000);
-        },
-
-        onLoadError: (err) => {
-          console.error("Rive load error:", err);
-          hideLoader();
-        }
-      });
-
-      window.addEventListener("resize", resizeRive);
+  wallExtensionRive = new rive.Rive({
+    src: "wall_extension.riv",
+    canvas: wallExtensionCanvas,
+    autoplay: true,
+    onLoad: () => {
+      resizeRive();
     }
+  });
+
+  r = new rive.Rive({
+    src: "vts_video_vault_master.riv",
+    canvas: canvas,
+    autoplay: true,
+    autoBind: true,
+    artboard: "VTS VIDEO DEN 02",
+    stateMachines: "State Machine 1",
+
+    onLoad: () => {
+      resizeRive();
+
+      syncLightsOverlay();
+
+      if (!lightsOverlayInterval) {
+        lightsOverlayInterval = setInterval(syncLightsOverlay, 100);
+      }
+
+      hideLoader();
+
+      setTimeout(() => {
+        loadGoogleChartsAndSheetData();
+      }, 3000);
+    },
+
+    onLoadError: (err) => {
+      console.error("Rive load error:", err);
+      hideLoader();
+    }
+  });
+
+  window.addEventListener("resize", resizeRive);
+}
 
     requestAnimationFrame(() => {
       requestAnimationFrame(startApp);
