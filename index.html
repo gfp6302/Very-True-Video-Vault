@@ -17,19 +17,20 @@
       margin: 0;
       min-height: 100%;
       background: var(--bg-teal);
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     body {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      min-height: 200vh;
       position: relative;
     }
 
     body::before {
       content: "";
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       right: 0;
@@ -102,7 +103,7 @@
 
     .frame {
       position: relative;
-      min-height: 100vh;
+      min-height: var(--scene-total-height);
       width: auto;
       overflow: hidden;
       z-index: 1;
@@ -224,7 +225,7 @@
 }
 
 .wall-side {
-  position: fixed;
+  position: absolute;
   top: 0;
   height: var(--wall-side-height);
   width: max(0px, calc((100vw - var(--scene-width)) / 2));
