@@ -336,13 +336,46 @@
 
     const SHEET_ID = "1XH9UmWCr_foe9-QFDNfpLVWKh9iSl2TStAZzncKG13E";
     const SHEET_NAME = "Sheet1";
+    const DEFAULT_POPUP_PAIR = {
+      headline: "PERSONAL NIGHTMARE FUEL",
+      subhead: "The movie that lives rent-free in your brain and shows up uninvited at 2 a.m."
+    };
+    const FONT_ASSET_URLS = {
+      "ArchivoBlack-Regular": "ArchivoBlack-Regular-4204923.ttf",
+      "Bebas Neue": "Bebas Neue-4227623.ttf"
+    };
+    const AUDIO_ASSET_URLS = {
+      babka: "babka.mp3",
+      booksFall: "booksFall.mp3",
+      booksReturn: "booksReturn.mp3",
+      drawerClose: "drawerClose.mp3",
+      drawerOpen: "drawerOpen.mp3",
+      gameCube: "gameCube.mp3",
+      lampA: "lampA.mp3",
+      lampB: "lampB.mp3",
+      lavaA: "lavaA.mp3",
+      lavaB: "lavaB.mp3",
+      lightswitched: "lightswitched.mp3",
+      playstation: "playstation.mp3",
+      seal: "seal.mp3",
+      tvA: "tvA.mp3",
+      tvB: "tvB.mp3",
+      tvC: "tvC.mp3",
+      tvD: "tvD.mp3",
+      tvE: "tvE.mp3",
+      tvSeq: "tvSeq.mp3"
+    };
+    const DEFAULT_AUDIO_VOLUME = 50;
 
     let r;
     let wallExtensionRive;
     let sheetRows = [];
     let lastRowIndex = -1;
     let staticSequenceLocked = false;
+    let staticSequenceListening = false;
     let lightsOverlayInterval = null;
+    let appStarted = false;
+    let audioVolumeBeforeMute = DEFAULT_AUDIO_VOLUME;
     let isMuted = false;
 
     function resizeRive() {
@@ -374,6 +407,14 @@
       return r.viewModelInstance.viewModel("propertyOfVMSwitch");
     }
 
+    function getAudioVolumeProperty() {
+      return r.viewModelInstance.number("audioVolume");
+    }
+
+    function initializeAudioVolume() {
+      getAudioVolumeProperty().value = DEFAULT_AUDIO_VOLUME;
+    }
+
     function syncLightsOverlay() {
       if (!r || !r.viewModelInstance) return;
 
@@ -389,6 +430,66 @@
       const popupVMI = getPopupVMI();
       popupVMI.string("headlineProperty").value = headline;
       popupVMI.string("subheadProperty").value = subhead;
+    }
+
+    function loadReferencedAsset(asset, bytes) {
+      if (!asset || bytes.length > 0 || asset.cdnUuid?.length > 0) {
+        return false;
+      }
+
+      if (asset.isFont) {
+        const fontUrl = FONT_ASSET_URLS[asset.name];
+        if (!fontUrl) {
+          console.warn(`No local font mapped for Rive asset "${asset.name}".`);
+          return false;
+        }
+
+        fetch(fontUrl)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`Unable to load ${fontUrl}: ${response.status}`);
+            }
+            return response.arrayBuffer();
+          })
+          .then((buffer) => rive.decodeFont(new Uint8Array(buffer)))
+          .then((font) => {
+            asset.setFont(font);
+            font.unref();
+          })
+          .catch((err) => {
+            console.error("Font load failed:", err);
+          });
+
+        return true;
+      }
+
+      if (!asset.isAudio) {
+        return false;
+      }
+
+      const audioUrl = AUDIO_ASSET_URLS[asset.name];
+      if (!audioUrl) {
+        console.warn(`No local audio mapped for Rive asset "${asset.name}".`);
+        return false;
+      }
+
+      fetch(audioUrl)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Unable to load ${audioUrl}: ${response.status}`);
+          }
+          return response.arrayBuffer();
+        })
+        .then((buffer) => rive.decodeAudio(new Uint8Array(buffer)))
+        .then((audio) => {
+          asset.setAudio(audio);
+          audio.unref();
+        })
+        .catch((err) => {
+          console.error("Audio load failed:", err);
+        });
+
+      return true;
     }
 
     function querySheetRows() {
@@ -446,10 +547,25 @@
     }
 
     function applyRandomPopupText() {
-      const pair = pickRandomRow(sheetRows);
-      if (!pair) return;
+      const pair = pickRandomRow(sheetRows) || DEFAULT_POPUP_PAIR;
       setPopupText(pair.headline, pair.subhead);
       resizeRive();
+    }
+
+    function listenForStaticSequence() {
+      if (staticSequenceListening) return;
+      staticSequenceListening = true;
+
+      getStaticSequenceTrigger().on(() => {
+        if (staticSequenceLocked) return;
+
+        staticSequenceLocked = true;
+        applyRandomPopupText();
+
+        setTimeout(() => {
+          staticSequenceLocked = false;
+        }, 9000);
+      });
     }
 
     function loadGoogleChartsAndSheetData() {
@@ -459,19 +575,6 @@
         try {
           sheetRows = await querySheetRows();
           applyRandomPopupText();
-
-          const staticSequenceTrigger = getStaticSequenceTrigger();
-
-          staticSequenceTrigger.on(() => {
-            if (staticSequenceLocked) return;
-
-            staticSequenceLocked = true;
-            applyRandomPopupText();
-
-            setTimeout(() => {
-              staticSequenceLocked = false;
-            }, 9000);
-          });
         } catch (err) {
           console.error("Sheet load failed:", err);
         }
@@ -479,6 +582,9 @@
     }
 
     function startApp() {
+  if (appStarted) return;
+  appStarted = true;
+
   wallExtensionRive = new rive.Rive({
     src: "wall_extension.riv",
     canvas: wallExtensionCanvas,
@@ -493,13 +599,17 @@
     canvas: canvas,
     autoplay: true,
     autoBind: true,
+    assetLoader: loadReferencedAsset,
     artboard: "VTS VIDEO DEN 02",
     stateMachines: "State Machine 1",
 
     onLoad: () => {
       resizeRive();
 
+      initializeAudioVolume();
       syncLightsOverlay();
+      applyRandomPopupText();
+      listenForStaticSequence();
 
       if (!lightsOverlayInterval) {
         lightsOverlayInterval = setInterval(syncLightsOverlay, 100);
@@ -526,8 +636,18 @@
     });
 
     volumeToggle.addEventListener("click", () => {
+      if (!r || !r.viewModelInstance) return;
+
       isMuted = !isMuted;
       volumeToggle.textContent = isMuted ? "🔇" : "🔊";
+
+      const audioVolumeProperty = getAudioVolumeProperty();
+      if (isMuted) {
+        audioVolumeBeforeMute = audioVolumeProperty.value;
+        audioVolumeProperty.value = 0;
+      } else {
+        audioVolumeProperty.value = audioVolumeBeforeMute;
+      }
     });
   </script>
 
